@@ -1,0 +1,303 @@
+solid Uranium STLWriter Thu 14 Nov 2019 00:36:30
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 56.0 40.0 8.0
+    vertex 56.0 56.0 8.0
+    vertex 56.0 56.0 32.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 56.0 40.0 8.0
+    vertex 56.0 56.0 32.0
+    vertex 56.0 40.0 32.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 48.0 16.0 8.0
+    vertex 48.0 24.0 8.0
+    vertex 48.0 24.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 48.0 16.0 8.0
+    vertex 48.0 24.0 16.0
+    vertex 48.0 16.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 24.0 48.0 8.0
+    vertex 24.0 56.0 8.0
+    vertex 24.0 56.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 24.0 48.0 8.0
+    vertex 24.0 56.0 16.0
+    vertex 24.0 48.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 24.0 16.0 8.0
+    vertex 24.0 24.0 8.0
+    vertex 24.0 24.0 24.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 24.0 16.0 8.0
+    vertex 24.0 24.0 24.0
+    vertex 24.0 16.0 24.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 40.0 32.0
+    vertex 56.0 40.0 32.0
+    vertex 56.0 56.0 32.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 40.0 32.0
+    vertex 56.0 56.0 32.0
+    vertex 40.0 56.0 32.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 16.0 16.0
+    vertex 48.0 16.0 16.0
+    vertex 48.0 24.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 16.0 16.0
+    vertex 48.0 24.0 16.0
+    vertex 40.0 24.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 48.0 16.0
+    vertex 24.0 48.0 16.0
+    vertex 24.0 56.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 48.0 16.0
+    vertex 24.0 56.0 16.0
+    vertex 16.0 56.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 16.0 24.0
+    vertex 24.0 16.0 24.0
+    vertex 24.0 24.0 24.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 16.0 24.0
+    vertex 24.0 24.0 24.0
+    vertex 16.0 24.0 24.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 56.0 8.0
+    vertex 40.0 56.0 32.0
+    vertex 56.0 56.0 32.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 56.0 8.0
+    vertex 56.0 56.0 32.0
+    vertex 56.0 56.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 24.0 8.0
+    vertex 40.0 24.0 16.0
+    vertex 48.0 24.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 24.0 8.0
+    vertex 48.0 24.0 16.0
+    vertex 48.0 24.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 56.0 8.0
+    vertex 16.0 56.0 16.0
+    vertex 24.0 56.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 56.0 8.0
+    vertex 24.0 56.0 16.0
+    vertex 24.0 56.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 24.0 8.0
+    vertex 16.0 24.0 24.0
+    vertex 24.0 24.0 24.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 24.0 8.0
+    vertex 24.0 24.0 24.0
+    vertex 24.0 24.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 40.0 8.0
+    vertex 40.0 40.0 32.0
+    vertex 40.0 56.0 32.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 40.0 8.0
+    vertex 40.0 56.0 32.0
+    vertex 40.0 56.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 16.0 8.0
+    vertex 40.0 16.0 16.0
+    vertex 40.0 24.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 16.0 8.0
+    vertex 40.0 24.0 16.0
+    vertex 40.0 24.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 48.0 8.0
+    vertex 16.0 48.0 16.0
+    vertex 16.0 56.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 48.0 8.0
+    vertex 16.0 56.0 16.0
+    vertex 16.0 56.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 16.0 8.0
+    vertex 16.0 16.0 24.0
+    vertex 16.0 24.0 24.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 16.0 8.0
+    vertex 16.0 24.0 24.0
+    vertex 16.0 24.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 48.0 40.0 8.0
+    vertex 48.0 40.0 20.0
+    vertex 40.0 40.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 56.0 40.0 8.0
+    vertex 48.0 40.0 20.0
+    vertex 48.0 40.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 56.0 40.0 32.0
+    vertex 48.0 40.0 20.0
+    vertex 56.0 40.0 8.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 40.0 32.0
+    vertex 48.0 40.0 20.0
+    vertex 56.0 40.0 32.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 40.0 8.0
+    vertex 48.0 40.0 20.0
+    vertex 40.0 40.0 32.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 16.0 8.0
+    vertex 48.0 16.0 8.0
+    vertex 48.0 16.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 40.0 16.0 8.0
+    vertex 48.0 16.0 16.0
+    vertex 40.0 16.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 48.0 8.0
+    vertex 24.0 48.0 8.0
+    vertex 24.0 48.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 48.0 8.0
+    vertex 24.0 48.0 16.0
+    vertex 16.0 48.0 16.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 16.0 8.0
+    vertex 24.0 16.0 8.0
+    vertex 24.0 16.0 24.0
+  endloop
+endfacet
+facet normal 0.0 0.0 0.0
+  outer loop
+    vertex 16.0 16.0 8.0
+    vertex 24.0 16.0 24.0
+    vertex 16.0 16.0 24.0
+  endloop
+endfacet
+endsolid Uranium STLWriter Thu 14 Nov 2019 00:36:30
