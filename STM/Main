@@ -129,7 +129,7 @@ void stepper_SingleStep(struct stepper step){
 void stepper_SingleStep_Slow(struct stepper step){
 	HAL_GPIO_WritePin(step.PinType,step.PinS,GPIO_PIN_SET);
 	//delay 1ms
-	delay_ms(50);							//50 => fast, 100 => slow
+	delay_ms(100);							//50 => fast, 100 => slow
 	HAL_GPIO_WritePin(step.PinType,step.PinS,GPIO_PIN_RESET);
 }
 void stepperStop(struct stepper step){
@@ -137,8 +137,16 @@ void stepperStop(struct stepper step){
 }
 void stepper_ManyStep(struct stepper step,uint16_t n){
 	
-	for(int i = n; i>0; i--){
+	for(int i = n+1; i>0; i--){
 			stepper_SingleStep(step);
+	}
+}
+void forward_ManyStep(uint16_t n){
+	stepperForward(Left);
+	stepperReverse(Right);
+	for(int i = n+1; i>=0; i--){
+		stepper_SingleStep(Right);
+		stepper_SingleStep(Left);
 	}
 }
 void stepper_Turn(struct stepper left, struct stepper right, char direction){
@@ -148,22 +156,51 @@ void stepper_Turn(struct stepper left, struct stepper right, char direction){
 	if(direction == 'L' || direction== 'l'){
 		stepperForward(right);
 		stepperForward(left);
+		for(int i=0;i<90;i++){
+			stepper_SingleStep_Slow(left);
+			stepper_SingleStep_Slow(right);
+	}
 	}
 	else if(direction == 'R' || direction == 'r'){
 		stepperReverse(left);
 		stepperReverse(right);
+		for(int i=0;i<90;i++){
+			stepper_SingleStep_Slow(left);
+			stepper_SingleStep_Slow(right);
+	}
 	}
 	else{
 		printf("invalide input");
 	}
-	for(int i=0;i<90;i++){
-		stepper_SingleStep_Slow(left);
-		stepper_SingleStep_Slow(right);
-	}
+	
 	
 }
+void grabItem(){
+	stepperForward(Grab);
+	/*	while(!buttonGrabOpen){ //button not pressed
+		stepper_SingleStep(Grab);
+		}
+	*/
+}
+void releaseItem(){
+		stepperReverse(Grab);
+	/*while(!buttonGrabOpen){ //button not pressed
+		stepper_SingleStep(Grab);
+		}
+	*/
+}
 
-
+void zero(){ //zeros the system so its in a known state 
+		stepperReverse(Lift);
+		stepperReverse(Grab);
+	/*while(!buttonLift){ //button not pressed
+		stepper_SingleStep(Lift);
+		}
+		while(!buttonGrabOpen){ //button not pressed
+		stepper_SingleStep(Grab);
+		}
+	*/
+}
 
 
 /* USER CODE END 0 */
@@ -189,8 +226,8 @@ int main(void)
 
 	
 	Left.PinType = GPIOC;
-	Left.PinD = GPIO_PIN_0; //NOT WOKRING
-	Left.PinS = GPIO_PIN_1; //NOT WOKRING
+	Left.PinD = GPIO_PIN_0; //WOKRING
+	Left.PinS = GPIO_PIN_1; //WOKRING
 	
 	 
 	Right.PinType = GPIOC;
@@ -227,7 +264,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /* USER CODE END 2 */
 
@@ -276,22 +313,6 @@ int main(void)
   while (1)
   {
 		
-	while(Run){
-		stepperForward(Lift);
-		//stepperReverse(Grab);
-		//stepperForward(Left);
-		//stepperReverse(Right);
-		//delay_ms(100);
-		stepper_ManyStep(Lift,10);
-		delay_ms(100);
-		//stepper_ManyStep(Grab,100);
-		//delay_ms(100);
-		//stepper_ManyStep(Left,100);
-		//delay_ms(100);
-		//stepper_ManyStep(Right,100);
-		//delay_ms(100);
-		
-		} 
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -644,25 +665,36 @@ void StartDefaultTask(void const * argument)
 		
 		
 		while(Run==1){   //Forward
-			stepperForward(Right);
-			stepperReverse(Left); //forward 
+			stepperForward(Left);
+			stepperReverse(Right); //forward
 			stepper_SingleStep(Left);
 			stepper_SingleStep(Right);
-			//delay_ms(10);
-			//osDelay(1);	
+			
 		} 
 		while(Run==2){	//Left turn
 			stepper_Turn(Left,Right,'L');
-			//delay_ms(100);
-			//osDelay(1);
+			
 		}
 		while(Run==3){	//Right Turn
-		//	stepperReverse();
-		//	stepperForward();
 			stepper_Turn(Left,Right,'R');
-			//delay_ms(100);
-			//osDelay(1);
+			//stepper_turn(Left, Right, R, 100)
+			//Ill comment in a segment to run this as "testing"
+			
 		}  
+		while(Run==4){ //lift
+			stepperForward(Lift);
+			stepper_SingleStep(Lift);
+			
+		}
+		while(Run==5){ //lower
+			stepperReverse(Lift);
+			stepper_SingleStep(Lift);
+			
+		}
+		while(Run==6){ //testing 100 step forward
+			forward_ManyStep(100);
+			Run=0;
+		}
   } 
   /* USER CODE END 5 */ 
 }
@@ -686,7 +718,7 @@ void thread1(void const * argument)
   {
     osDelay(1);
 		if(ADC_valArray[0] < 100){Run=0; } //Stop front optic PA0
-		if(ADC_valArray[1] <100){Run=1;} //Go optic -> turn right for testing PA1
+		if(ADC_valArray[1] <100){Run=6;} //Go optic -> forward for testing PA1
 		if(ADC_valArray[2] <100){Run=2;} //Left optic -> turn left for testing PA4
 		if(ADC_valArray[3] <100){Run=3;} //Right optic -> turn left for testing PB0
 		delay_ms(100);
