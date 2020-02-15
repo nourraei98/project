@@ -216,13 +216,13 @@ int main(void)
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	 
 	Lift.PinType = GPIOC;
-	Lift.PinD = GPIO_PIN_9; //working
-	Lift.PinS = GPIO_PIN_8; //working
+	Lift.PinD = GPIO_PIN_9; //not working
+	Lift.PinS = GPIO_PIN_8; //not working
 	
 	 
 	Grab.PinType = GPIOC;
-	Grab.PinD = GPIO_PIN_7; //NOT WOKRING
-	Grab.PinS = GPIO_PIN_6; //NOT WOKRING
+	Grab.PinD = GPIO_PIN_7; //WOKRING
+	Grab.PinS = GPIO_PIN_6; //WOKRING
 
 	
 	Left.PinType = GPIOC;
@@ -664,9 +664,9 @@ void StartDefaultTask(void const * argument)
     osDelay(1);
 		
 		
-		while(Run==1){   //Forward
-			stepperForward(Left);
-			stepperReverse(Right); //forward
+		while(Run==1){   //reverse
+			stepperForward(Right);
+			stepperReverse(Left); //forward
 			stepper_SingleStep(Left);
 			stepper_SingleStep(Right);
 			
@@ -682,12 +682,12 @@ void StartDefaultTask(void const * argument)
 			
 		}  
 		while(Run==4){ //lift
-			stepperForward(Lift);
+			stepperReverse(Lift);
 			stepper_SingleStep(Lift);
 			
 		}
 		while(Run==5){ //lower
-			stepperReverse(Lift);
+			stepperForward(Lift);
 			stepper_SingleStep(Lift);
 			
 		}
@@ -717,9 +717,9 @@ void thread1(void const * argument)
   for(;;)
   {
     osDelay(1);
-		if(ADC_valArray[0] < 100){Run=0; } //Stop front optic PA0
-		if(ADC_valArray[1] <100){Run=6;} //Go optic -> forward for testing PA1
-		if(ADC_valArray[2] <100){Run=2;} //Left optic -> turn left for testing PA4
+		if(ADC_valArray[0] < 100){Run=2; } //Stop front optic PA0
+		if(ADC_valArray[1] <100){Run=1;} //Go optic -> forward for testing PA1
+		if(ADC_valArray[2] <100){Run=0;} //Left optic -> turn left for testing PA4
 		if(ADC_valArray[3] <100){Run=3;} //Right optic -> turn left for testing PB0
 		delay_ms(100);
   }
