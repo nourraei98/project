@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2019 STMicroelectronics International N.V. 
+  * Copyright (c) 2020 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -50,6 +50,7 @@
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
+#include <string.h>
 
 /* USER CODE BEGIN Includes */
 
@@ -62,9 +63,12 @@ DMA_HandleTypeDef hdma_adc1;
 TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 osThreadId SteppersHandle;
 osThreadId OpticSensorsHandle;
+osThreadId SerialComHandle;
+osMessageQId InstructionsHandle;
 osMutexId uartMutexHandle;
 
 /* USER CODE BEGIN PV */
@@ -78,11 +82,16 @@ struct stepper{
 unsigned int time;
 int Run;
 int pass;
+int state; 
+int canRead;
 struct stepper Lift;
 struct stepper Grab;
 struct stepper Left;
 struct stepper Right;
 uint8_t ADC_valArray[5]; 
+uint8_t mySendData[13] = "hello all\r\n";
+uint8_t receivedData[13] ="";
+QueueHandle_t items; 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* USER CODE END PV */
 
@@ -93,8 +102,9 @@ static void MX_DMA_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
-void StartDefaultTask(void const * argument);
-void thread1(void const * argument);
+void StartMotorTask(void const * argument);
+void StartSensorTask(void const * argument);
+void StartCommunicationTask(void const * argument);
                                     
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
                                 
@@ -156,17 +166,17 @@ void stepper_Turn(struct stepper left, struct stepper right, char direction){
 	if(direction == 'L' || direction== 'l'){
 		stepperForward(right);
 		stepperForward(left);
-		for(int i=0;i<90;i++){
-			stepper_SingleStep_Slow(left);
-			stepper_SingleStep_Slow(right);
+		for(int i=0;i<5;i++){
+			stepper_SingleStep(left);
+			stepper_SingleStep(right);
 	}
 	}
 	else if(direction == 'R' || direction == 'r'){
 		stepperReverse(left);
 		stepperReverse(right);
 		for(int i=0;i<90;i++){
-			stepper_SingleStep_Slow(left);
-			stepper_SingleStep_Slow(right);
+			stepper_SingleStep(left);
+			stepper_SingleStep(right);
 	}
 	}
 	else{
@@ -237,8 +247,12 @@ int main(void)
 	time = 500;
 	Run = 0;
 	pass = 0;
+	state = 0;
+	canRead = 0;
+	items = xQueueCreate(20, sizeof("L2"));
+	
   /* USER CODE END 1 */
-
+	
   /* MCU Configuration----------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -287,16 +301,26 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of Steppers */
-  osThreadDef(Steppers, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(Steppers, StartMotorTask, osPriorityNormal, 0, 128);
   SteppersHandle = osThreadCreate(osThread(Steppers), NULL);
 
   /* definition and creation of OpticSensors */
-  osThreadDef(OpticSensors, thread1, osPriorityNormal, 0, 128);
+  osThreadDef(OpticSensors, StartSensorTask, osPriorityNormal, 0, 128);
   OpticSensorsHandle = osThreadCreate(osThread(OpticSensors), NULL);
+
+  /* definition and creation of SerialCom */
+  osThreadDef(SerialCom, StartCommunicationTask, osPriorityNormal, 0, 128);
+  SerialComHandle = osThreadCreate(osThread(SerialCom), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the queue(s) */
+  /* definition and creation of Instructions */
+/* what about the sizeof here??? cd native code */
+  osMessageQDef(Instructions, 16, uint16_t);
+  InstructionsHandle = osMessageCreate(osMessageQ(Instructions), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -511,7 +535,7 @@ static void MX_USART2_UART_Init(void)
 {
 
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -532,8 +556,12 @@ static void MX_DMA_Init(void)
 {
   /* DMA controller clock enable */
   __HAL_RCC_DMA2_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
@@ -626,7 +654,28 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 //////////////////////////////////////////////////////////example priority levels low to high: 1 to 10////////////////////////////////////
-		void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+
+void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(huart);
+  /* NOTE: This function Should not be modified, when the callback is needed,
+           the HAL_UART_TxCpltCallback could be implemented in the user file
+   */
+	//HAL_UART_Transmit(&huart2,receivedData, 13 ,10); //transmis data uart,dataArray,size,timeout in ms
+	HAL_Delay(100);
+	int i = 0;
+	char temp[13];
+	
+	for(int i=0; i<13;i++){ 
+		xQueueSend(items,&receivedData[i],10);
+		i++;
+	}
+}
+
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 			if(GPIO_Pin == B1_Pin){
 				
 				//set run to on or off priority 10
@@ -646,14 +695,14 @@ static void MX_GPIO_Init(void)
 		}
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_StartMotorTask */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the Steppers thread.
   * @param  argument: Not used 
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
+/* USER CODE END Header_StartMotorTask */
+void StartMotorTask(void const * argument)
 {
 
   /* USER CODE BEGIN 5 */
@@ -699,31 +748,72 @@ void StartDefaultTask(void const * argument)
   /* USER CODE END 5 */ 
 }
 
-/* USER CODE BEGIN Header_thread1 */
+/* USER CODE BEGIN Header_StartSensorTask */
 /**
-* @brief Function implementing the moveMotors thread.
+* @brief Function implementing the OpticSensors thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_thread1 */
-void thread1(void const * argument)
+/* USER CODE END Header_StartSensorTask */
+void StartSensorTask(void const * argument)
 {
-  /* USER CODE BEGIN thread1 */
+  /* USER CODE BEGIN StartSensorTask */
   /* Infinite loop */
 	
-	
 	HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_valArray,5); 
-	
+	uint8_t temp='B';
+	uint8_t L = 'L';
+	uint8_t F = 'F';
+	uint8_t count=0;
   for(;;)
   {
     osDelay(1);
-		if(ADC_valArray[0] < 100){Run=2; } //Stop front optic PA0
-		if(ADC_valArray[1] <100){Run=1;} //Go optic -> forward for testing PA1
-		if(ADC_valArray[2] <100){Run=0;} //Left optic -> turn left for testing PA4
-		if(ADC_valArray[3] <100){Run=3;} //Right optic -> turn left for testing PB0
+		if(ADC_valArray[2] < 100){Run=0; state=1; } //Stop front optic PA0
+		else if(ADC_valArray[1] <100){Run=0; state=1;} //Go optic -> forward for testing PA1
+		else if(ADC_valArray[0] <100){Run=0; state=1;} //Left optic -> turn left for testing PA4
+		else if(ADC_valArray[3] <100){Run=0; state=1;} //Right optic -> turn left for testing PB0
+		else if(count ==0){
+			xQueueReceive(items,&temp,10);
+			if(temp == F){Run=1;}
+			if(temp == L){Run=2;}
+			xQueueReceive(items,&count,10);
+		}
+		else{
+		count--;
+		}
 		delay_ms(100);
   }
-  /* USER CODE END thread1 */
+  /* USER CODE END StartSensorTask */
+}
+
+/* USER CODE BEGIN Header_StartCommunicationTask */
+/**
+* @brief Function implementing the SerialCom thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartCommunicationTask */
+void StartCommunicationTask(void const * argument)
+{
+  /* USER CODE BEGIN StartCommunicationTask */
+  /* Infinite loop */
+	uint8_t stub[] = {'F',100,'L',255,'L',255};
+  for(;;)
+  {
+		osDelay(1);
+		//HAL_UART_Transmit(&huart2, mySendData, 100 ,10); //transmis data uart,dataArray,size,timeout in ms
+		//HAL_Delay(1000);
+		HAL_UART_Receive_DMA(&huart2, receivedData, 13);
+	  HAL_Delay(100);
+		
+		for(int i=0; i<6;i++){ 
+		xQueueSend(items,&stub[i],10);
+		i++;
+	  }
+		
+		
+  }
+  /* USER CODE END StartCommunicationTask */
 }
 
 /**
