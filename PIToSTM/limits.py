@@ -1,16 +1,21 @@
-##import io
-#ser = serial.Serial("/dev/ttyACM0", 9600)
-#ser.baudrate=9600
-#sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
-
-#sio.write(unicode("hello\n")) #pass in used array
+import serial
+import io
+#ser = serial.Serial("/dev/ttyACM0", 9600) #opens serial port with this baudrate
+#print(ser.name) #this gives you the name of the port youre using
+#ser.open() #returns if port is open 
+#ser.baudrate=9600 #sets baudrate in another way
+reader = io.open("limits.txt","rb")
+writer = io.open("Sample1.txt","wb")
+sio = io.TextIOWrapper(io.BufferedRWPair(reader, writer)) #bufferes streams that are both readable and writeable
+str1="hello"
+#sio.write(str(converted)) #pass in used array
 #sio.flush() # it is buffering. required to get the data out *now*
-#hello = sio.readline()
+#hello = sio.readline() this is to read from the stm so reieving
 #print(hello == unicode("hello\n")) #unicode? ascii? up to you to decide the format
 
 
 values = open("limits.txt").read().split()
-
+ 
 #function that convrts the string commands into bit array
 def tobits(s):
     result = []
@@ -44,7 +49,11 @@ if i < highestX: # moving in x direction, we can use i to track later..
     print(converted)
     print(out)
 
+sio.write(str(converted)) #pass in used array
+sio.flush() # it is buffering. required to get the data out *now*
 
-if i < highestY: # moving in y direction
-    #stepper_SingleStep(struct stepper step) #move i steps in y direction
-        i+=1 #increment
+while(True): #keeps stream open for listening
+    warn = sio.readline() #reads the inputs from stream
+    if(warn): #if whatever is read from the sream = stop
+        break
+sio.close()
