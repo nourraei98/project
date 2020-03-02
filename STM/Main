@@ -249,7 +249,7 @@ int main(void)
 	pass = 0;
 	state = 0;
 	canRead = 0;
-	items = xQueueCreate(20, sizeof("L2"));
+	items = xQueueCreate(20, sizeof(uint8_t));
 	
   /* USER CODE END 1 */
 	
@@ -667,10 +667,10 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
 	int i = 0;
 	char temp[13];
 	
-	for(int i=0; i<13;i++){ 
+	/*for(int i=0; i<13;i++){   //for doesnt work
 		xQueueSend(items,&receivedData[i],10);
 		i++;
-	}
+	} */
 }
 
 
@@ -761,10 +761,11 @@ void StartSensorTask(void const * argument)
   /* Infinite loop */
 	
 	HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_valArray,5); 
-	uint8_t temp='B';
+	uint8_t instruction='B';
 	uint8_t L = 'L';
 	uint8_t F = 'F';
 	uint8_t count=0;
+	uint8_t *rxCount =0;
   for(;;)
   {
     osDelay(1);
@@ -772,14 +773,28 @@ void StartSensorTask(void const * argument)
 		else if(ADC_valArray[1] <100){Run=0; state=1;} //Go optic -> forward for testing PA1
 		else if(ADC_valArray[0] <100){Run=0; state=1;} //Left optic -> turn left for testing PA4
 		else if(ADC_valArray[3] <100){Run=0; state=1;} //Right optic -> turn left for testing PB0
-		else if(count ==0){
-			xQueueReceive(items,&temp,10);
-			if(temp == F){Run=1;}
-			if(temp == L){Run=2;}
-			xQueueReceive(items,&count,10);
+		else if(count <= 0){
+			if(canRead == 1){
+			Run = 0;
+			if(xQueueReceive(items,&instruction,( TickType_t ) 10 ) == pdPASS) {
+				if(xQueueReceive(items,&rxCount,( TickType_t ) 10 ) == pdPASS){
+					count = *rxCount;
+			}
+				if(instruction == F){
+				Run=1;
+				//instruction = 'B';
+			}
+			else if(instruction == L){
+				Run=2;
+				//instruction = 'B';
+			}}
+			
+			
+			
+		}
 		}
 		else{
-		count--;
+		count = count - 1;
 		}
 		delay_ms(100);
   }
@@ -797,7 +812,15 @@ void StartCommunicationTask(void const * argument)
 {
   /* USER CODE BEGIN StartCommunicationTask */
   /* Infinite loop */
-	uint8_t stub[] = {'F',100,'L',255,'L',255};
+	uint8_t stub[] = {'F',100,'L',100,'L',200};
+	canRead = 0;
+	xQueueSendToBack(items,(uint8_t *) &stub[0],( TickType_t )10);
+	xQueueSendToBack(items,(uint8_t *) &stub[1],( TickType_t )10);
+	xQueueSendToBack(items,(uint8_t *) &stub[2],( TickType_t )10);
+	xQueueSendToBack(items,(uint8_t *) &stub[3],( TickType_t )10);
+	xQueueSendToBack(items,(uint8_t *) &stub[4],( TickType_t )10);
+	xQueueSendToBack(items,(uint8_t *) &stub[5],( TickType_t )10);
+	canRead = 1;
   for(;;)
   {
 		osDelay(1);
@@ -806,10 +829,7 @@ void StartCommunicationTask(void const * argument)
 		HAL_UART_Receive_DMA(&huart2, receivedData, 13);
 	  HAL_Delay(100);
 		
-		for(int i=0; i<6;i++){ 
-		xQueueSend(items,&stub[i],10);
-		i++;
-	  }
+		
 		
 		
   }
