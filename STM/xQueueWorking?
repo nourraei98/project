@@ -663,9 +663,7 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
            the HAL_UART_TxCpltCallback could be implemented in the user file
    */
 	//HAL_UART_Transmit(&huart2,receivedData, 13 ,10); //transmis data uart,dataArray,size,timeout in ms
-	HAL_Delay(100);
-	int i = 0;
-	char temp[13];
+	
 	
 	/*for(int i=0; i<13;i++){   //for doesnt work
 		xQueueSend(items,&receivedData[i],10);
@@ -813,7 +811,7 @@ void StartCommunicationTask(void const * argument)
 {
   /* USER CODE BEGIN StartCommunicationTask */
   /* Infinite loop */
-	uint8_t stub[] = {'F',(uint8_t) 10,'L',(uint8_t)20,'R',(uint8_t)30};
+	uint8_t stub[] = {'R',255,'L',20,'S',0};
 	canRead = 0;
 	xQueueSendToBack(items,(uint8_t *) &stub[0],( TickType_t )10);
 	xQueueSendToBack(items,(uint8_t *) &stub[1],( TickType_t )10);
@@ -829,7 +827,13 @@ void StartCommunicationTask(void const * argument)
 		//HAL_Delay(1000);
 		HAL_UART_Receive_DMA(&huart2, receivedData, 13);
 	  HAL_Delay(100);
+		/*if(receivedData == 'S'){
+				xQueueReset(items);
+				count = 0;
+				Run = 0;
+		}
 		
+		*/
 		
 		
 		
